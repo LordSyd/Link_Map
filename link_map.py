@@ -46,6 +46,8 @@ used to draw the marker at a given position
   def check_click(self, mouse):
     if self.rect.collidepoint(mouse):
       self.image.set_alpha(200)
+    if not self.rect.collidepoint(mouse):
+      self.image.set_alpha(50)
 
 
 class Connection:
@@ -90,6 +92,9 @@ running = True
 
 while running:
   if num_clicks > 0:
+    for s in all_sprites:
+      mouse_pos = pygame.mouse.get_pos()
+      s.check_click(mouse_pos)
     for connection in connections_list:
       if not connection.check_if_full():
         x, y = connection.get_entrance()
@@ -102,8 +107,6 @@ while running:
       running = False
     elif event.type == pygame.MOUSEBUTTONDOWN:
       num_clicks += 1
-      for s in all_sprites:
-        s.check_click(event.pos)
       var = get_instance_name(pygame.mouse.get_pos())
       var = Connection()
       connections_list.append(var)
