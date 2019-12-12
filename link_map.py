@@ -115,9 +115,6 @@ while running:
       print(var.get_entrance())
       print(all_sprites)
       print(connections_list[0].get_entrance())
-      s, j = var.get_entrance()
-      test = Marker(s, j)
-      all_sprites.add(test)
 
   screen.fill(BLACK)
   all_sprites.update()
