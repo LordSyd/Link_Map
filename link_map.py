@@ -11,10 +11,9 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 
 screen = pygame.display.set_mode((500, 500))
-running = True
 
 connections_list = []
-num_clicks = 0
+num_clicks = 1
 
 
 def get_instance_name(position):
@@ -46,8 +45,12 @@ used to draw the marker at a given position
   def check_click(self, mouse):
     if self.rect.collidepoint(mouse):
       self.image.set_alpha(200)
+      return True
     if not self.rect.collidepoint(mouse):
       self.image.set_alpha(50)
+
+  def get_sprite_position(self):
+    return (self.rect.x, self.rect.y)
 
 
 class Connection:
@@ -62,9 +65,12 @@ class Connection:
     self.full = full
 
   def set_entrance_or_exit(self, position):
-    if self.entrance is None:
+    if self.check_if_full():
+      print('full')
+      return
+    elif self.entrance is None:
       self.entrance = position
-    if self.exit is None:
+    elif not self.entrance is None and self.exit is None:
       self.exit = position
       self.full = True
 
@@ -84,9 +90,8 @@ class Connection:
     return self.full
 
 
-#test2 = Marker(10, 10)
 all_sprites = pygame.sprite.Group()
-# all_sprites.add(test2)
+
 
 running = True
 
@@ -95,12 +100,7 @@ while running:
     for s in all_sprites:
       mouse_pos = pygame.mouse.get_pos()
       s.check_click(mouse_pos)
-    for connection in connections_list:
-      if not connection.check_if_full():
-        x, y = connection.get_entrance()
-        marker_entrance = connection + '_entrance'
-        marker_entrance = Marker(x, y)
-        all_sprites.add(marker_entrance)
+      # print(type(s))
 
   for event in pygame.event.get():
     if event.type == pygame.QUIT:
@@ -109,13 +109,14 @@ while running:
       num_clicks += 1
       var = get_instance_name(pygame.mouse.get_pos())
       var = Connection()
-      connections_list.append(var)
+      # connections_list.append(var)
       var.set_entrance_or_exit(pygame.mouse.get_pos())
 
+      print(var.get_exit())
       print(var.get_entrance())
-      print(all_sprites)
-      print(connections_list[0].get_entrance())
-      s, j = var.get_entrance()
+      # print(all_sprites)
+      # print(connections_list[0].get_entrance())
+      s, j = var.get_entrance()  # gets mouse position
       test = Marker(s, j)
       all_sprites.add(test)
 
