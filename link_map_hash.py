@@ -31,6 +31,7 @@ used to draw the marker at a given position
     self.image = pygame.Surface((50, 50))
     self.image.fill(RED)
     self.image.set_alpha(50)
+    self.key = key
 
     self.rect = self.image.get_rect()
     self.rect.x = x
@@ -51,6 +52,9 @@ used to draw the marker at a given position
 
   def get_function(self):
     return self.function
+
+  def get_marker_connection_pair_key(self):
+    return self.key
 
 
 class Connections:
@@ -100,12 +104,12 @@ def check_collision(pos):
   for s in entrances:
     if s.check_click(pos) == True:
       collide = True
-      return collide
+      return collide, s.get_marker_connection_pair_key()
   for s in exits:
     if s.check_click(pos) == True:
       collide = True
-      return collide
-  return collide
+      return collide, s.get_marker_connection_pair_key()
+  return collide, None
 
 
 def switch_draw_markers(id):
@@ -126,15 +130,18 @@ while running:
   key = pygame.key.get_pressed()
 
   mouse = pygame.mouse.get_pos()
-  collide = check_collision(mouse)
+  collide, colliding_marker_key = check_collision(mouse)
 
   for event in pygame.event.get():
     if event.type == pygame.QUIT:
       running = False
     elif event.type == pygame.MOUSEBUTTONDOWN and event.button == LEFT:
-      if collide == False or collide == None:
+      if collide is False or collide == None:
         mouse = pygame.mouse.get_pos()
         connections.add_entrance_or_exit(mouse)
+      elif collide is True:
+        print(connections.return_pos_pair(colliding_marker_key))
+
     elif key[pygame.K_a]:
       if switch_draw_entrances is True:
         switch_draw_entrances = False
@@ -154,7 +161,6 @@ while running:
   if switch_draw_exits is True:
     exits.draw(screen)
   pygame.display.update()
-  print(collide)
 
 
 pygame.quit()
