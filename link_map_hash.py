@@ -1,5 +1,5 @@
 import pygame
-
+from pygame.locals import *
 
 pygame.init()
 
@@ -15,6 +15,8 @@ running = True
 
 
 LEFT = 1
+switch_draw_entrances = True
+switch_draw_exits = True
 
 
 class Marker(pygame.sprite.Sprite):
@@ -71,7 +73,7 @@ class Connections:
       pos_x, pos_y = position
       new_key = key + "_entrance"
       new_key = Marker(pos_x, pos_y, key, "entrance")
-      all_sprites.add(new_key)
+      entrances.add(new_key)
       self.switch = True
     else:
       key = self.key_dict[-1]
@@ -79,7 +81,7 @@ class Connections:
       pos_x, pos_y = position
       new_key = key + "_exit"
       new_key = Marker(pos_x, pos_y, key, "exit")
-      all_sprites.add(new_key)
+      exits.add(new_key)
       self.con_dict[key] = [old_pos, position]
       self.switch = False
 
@@ -87,31 +89,44 @@ class Connections:
     return self.con_dict[key]
 
 
-all_sprites = pygame.sprite.Group()
+entrances = pygame.sprite.Group()
+exits = pygame.sprite.Group()
 
 connections = Connections()
 
 
 def check_collision(pos):
   collide = False
-  for s in all_sprites:
+  for s in entrances:
+    if s.check_click(pos) == True:
+      collide = True
+      return collide
+  for s in exits:
     if s.check_click(pos) == True:
       collide = True
       return collide
   return collide
 
 
-running = True
+def switch_draw_markers(id):
+  if id == "entrances":
+    if switch_draw_entrances is True:
+      switch_draw_entrances = False
+    else:
+      switch_draw_entrances = True
+  if id == "exits":
+    if switch_draw_exits is True:
+      switch_draw_exits = False
+    else:
+      switch_draw_exits = True
 
 
 while running:
 
+  key = pygame.key.get_pressed()
+
   mouse = pygame.mouse.get_pos()
   collide = check_collision(mouse)
-
-  # for s in all_sprites:
-  # s.check_click(mouse)
-  #collide = s.collide_check(mouse)
 
   for event in pygame.event.get():
     if event.type == pygame.QUIT:
@@ -120,18 +135,26 @@ while running:
       if collide == False or collide == None:
         mouse = pygame.mouse.get_pos()
         connections.add_entrance_or_exit(mouse)
+    elif key[pygame.K_a]:
+      if switch_draw_entrances is True:
+        switch_draw_entrances = False
+      else:
+        switch_draw_entrances = True
+    elif key[pygame.K_d]:
+      if switch_draw_exits is True:
+        switch_draw_exits = False
+      else:
+        switch_draw_exits = True
 
   screen.fill(BLACK)
-  all_sprites.update()
-  all_sprites.draw(screen)
+  entrances.update()
+  exits.update()
+  if switch_draw_entrances is True:
+    entrances.draw(screen)
+  if switch_draw_exits is True:
+    exits.draw(screen)
   pygame.display.update()
   print(collide)
-
-  # print(s.get_function())
-  # for i in connections.key_dict:
-  #var = connections.con_dict[i]
-
-  #print('key: ' + i + '; value: ' + str(var))
 
 
 pygame.quit()
