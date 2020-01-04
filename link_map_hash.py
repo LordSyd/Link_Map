@@ -51,16 +51,19 @@ class Marker(pygame.sprite.Sprite):
         self.rect.y = y
         self.w = 20
         self.h = 20
+        self.shift_x = 0
+        self.shift_y = 0
 
         self.function = function
 
     def check_click(self, mouse):
+
         if self.rect.collidepoint(mouse):
             self.image.set_alpha(200)
             return True
 
         if not self.rect.collidepoint(mouse):
-            self.image.set_alpha(200)
+            self.image.set_alpha(50)
 
     def collide_check(self, mouse):
         return self.rect.collidepoint(mouse)
@@ -72,6 +75,9 @@ class Marker(pygame.sprite.Sprite):
         return self.key
 
     def render(self, display, shift_x, shift_y, zoom=False):
+        self.shift_x = shift_x
+        self.shift_y = shift_y
+
         items_list = list(BackGround.rect)
         width_bg = items_list[2]
         height_bg = items_list[3]
@@ -146,7 +152,7 @@ def calculate_shift(x, y):
     new_y = (height / 2) - (y * zoom_factor)
     real_x = limit(new_x, (width - width_bg), 0)
     real_y = limit(new_y, (height - height_bg), 0)
-    return real_x, real_y
+    return int(real_x), int(real_y)
 
 
 mouse_x = 0
@@ -165,8 +171,6 @@ while running:
 
     key = pygame.key.get_pressed()
 
-    mouse = pygame.mouse.get_pos()
-    collide, colliding_marker_key = check_collision(mouse)
     if switch_zoom is False:
         new_x, new_y = calculate_shift(mouse_x, mouse_y)
         screen.blit(BackGround.image, (new_x, new_y))
@@ -209,16 +213,29 @@ while running:
             else:
                 switch_draw_exits = True
 
+    mouse = pygame.mouse.get_pos()
+    mouse_xx, mouse_yy = mouse
+
+    real_xx = mouse_xx + abs(new_x)
+    real_yy = mouse_yy + abs(new_y)
+
+    collide, colliding_marker_key = check_collision((real_xx, real_yy))
+
     entrances.update()
     exits.update()
     if switch_draw_entrances is True and switch_zoom is False:
         for entrance in entrances:
 
             entrance.render(screen, new_x, new_y)
-    if switch_draw_exits is True and switch_zoom is True:
+            print(entrance.rect.x, entrance.rect.y, entrance.rect)
+    if switch_draw_exits is True and switch_zoom is False:
         for exit in exits:
 
             exit.render(screen, new_x, new_y)
+    if switch_draw_exits is True and switch_zoom is True:
+        for exit in exits:
+
+            exit.render(screen, new_x, new_y, True)
     if switch_draw_entrances is True and switch_zoom is True:
 
         for entrance in entrances:
